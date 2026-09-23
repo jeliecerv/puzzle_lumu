@@ -1,8 +1,10 @@
 from urllib import request, error
 import json
+from concurrent.futures import ThreadPoolExecutor
 
 
 FRAGMENTS_SERVER = "http://localhost:8080/fragment?id={}"
+MAX_FRAGMENTS = 80
 final_fragment_text = {}
 
 
@@ -21,15 +23,20 @@ def save_fragment_text(fragment: dict) -> None:
     """Save a fragment text to a file."""
     final_fragment_text[int(fragment["index"])] = fragment.get("text", "")
 
+def fetch_and_save(fragment_id: int) -> None:
+    fragment = get_fragment(fragment_id)
+    if fragment:
+        save_fragment_text(fragment)
+
+def call_all_request_same_time() -> None:
+    """Call all requests at the same time using threads."""
+    
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        executor.map(fetch_and_save, range(0, MAX_FRAGMENTS))
 
 def main() -> None:
     """Main function to fetch and print fragments for a range of IDs."""
-    for fragment_id in range(0, 100):  # Example range of fragment IDs
-        fragment = get_fragment(fragment_id)
-        if fragment:
-            save_fragment_text(fragment)
-        else:
-            print(f"No fragment found for ID {fragment_id}.")
+    call_all_request_same_time()
 
     final_fragment_sorted = dict(sorted(final_fragment_text.items()))
     print(" ".join(final_fragment_sorted.values()))  # Print the concatenated fragment texts
