@@ -34,12 +34,23 @@ def call_all_request_same_time() -> None:
     with ThreadPoolExecutor(max_workers=10) as executor:
         executor.map(fetch_and_save, range(0, MAX_FRAGMENTS))
 
+def is_completed() -> bool:
+    """Check if all fragments have been fetched."""
+    if not final_fragment_text:
+        return False
+
+    indexes = sorted(final_fragment_text)
+    return indexes == list(range(indexes[-1] + 1))
+
 def main() -> None:
     """Main function to fetch and print fragments for a range of IDs."""
     call_all_request_same_time()
 
-    final_fragment_sorted = dict(sorted(final_fragment_text.items()))
-    print(" ".join(final_fragment_sorted.values()))  # Print the concatenated fragment texts
+    if is_completed():
+        final_fragment_sorted = dict(sorted(final_fragment_text.items()))
+        print(" ".join(final_fragment_sorted.values()))
+    else:
+        print("The puzzle is incomplete.")
 
 if __name__ == "__main__":
     main()
