@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 FRAGMENTS_SERVER = "http://localhost:8080/fragment?id={}"
 MAX_FRAGMENTS = 80
+MAX_WORKERS = 50
 final_fragment_text = {}
 
 
@@ -31,7 +32,7 @@ def fetch_and_save(fragment_id: int) -> None:
 def call_all_request_same_time() -> None:
     """Call all requests at the same time using threads."""
     
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         executor.map(fetch_and_save, range(0, MAX_FRAGMENTS))
 
 def is_completed() -> bool:
